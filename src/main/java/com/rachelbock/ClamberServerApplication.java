@@ -1,5 +1,7 @@
 package com.rachelbock;
 
+import com.rachelbock.resources.UserResource;
+import com.rachelbock.resources.WallSectionResource;
 import com.rachelbock.resources.WallsResource;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
@@ -26,6 +28,8 @@ public class ClamberServerApplication extends Application<ClamberServerConfigura
     public void run(final ClamberServerConfiguration configuration,
                     final Environment environment) {
         environment.jersey().register(new WallsResource());
+        environment.jersey().register(new WallSectionResource());
+        environment.jersey().register(new UserResource());
     }
 
 }

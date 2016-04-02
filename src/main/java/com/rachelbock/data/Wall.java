@@ -1,20 +1,14 @@
 package com.rachelbock.data;
 
 /**
- * Created by rage on 3/13/16.
+ * Class to hold Wall data
  */
 public class Wall {
+
     protected int id;
     protected String name;
-    protected long lastUpdated;
 
-    public long getLastUpdated() {
-        return lastUpdated;
-    }
 
-    public void setLastUpdated(long lastUpdated) {
-        this.lastUpdated = lastUpdated;
-    }
 
     public int getId() {
         return id;
