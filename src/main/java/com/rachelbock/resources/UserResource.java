@@ -57,21 +57,19 @@ public class UserResource {
 
 
     @POST
-    public User addUserToDatabase(String request) {
-        System.out.println("Received request : " + request);
-        return new User();
-//        try (Connection conn = getConnection();
-//             Statement stmt = conn.createStatement()){
-//
-//            stmt.execute("INSERT INTO user_information (user_name, height, skill_level) VALUES " +
-//                    "('" + request.getUsername() + "', " + request.getHeight() + ", " + request.getSkill() + ")");
-//            return getUserByUserName(request.getUsername());
-//
-//        } catch (SQLException e1) {
-//            e1.printStackTrace();
-//        }
-//
-//        throw new InternalServerErrorException("Could not create new user " + request.getUsername());
+    public User addUserToDatabase(NewUserRequest request) {
+        try (Connection conn = getConnection();
+             Statement stmt = conn.createStatement()){
+
+            stmt.execute("INSERT INTO user_information (user_name, height, skill_level) VALUES " +
+                    "('" + request.getUsername() + "', " + request.getHeight() + ", " + request.getSkill() + ")");
+            return getUserByUserName(request.getUsername());
+
+        } catch (SQLException e1) {
+            e1.printStackTrace();
+        }
+
+        throw new InternalServerErrorException("Could not create new user " + request.getUsername());
     }
 
     /**
