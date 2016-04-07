@@ -12,13 +12,19 @@ import java.util.List;
 import java.util.Properties;
 
 /**
- * Created by rage on 3/13/16.
+ * Class to set up the database connection for Walls
  */
-@Path("/user/{username}/walls/{id}")
+
+@Path("/user/{username}/walls/{wall_id}")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class WallsResource {
 
+    /**
+     * Gets a Connection to the Clamber Database
+     * @return - connection
+     * @throws SQLException
+     */
     public Connection getConnection() throws SQLException {
         Properties connectionProps = new Properties();
         connectionProps.put("user", "root");
@@ -34,9 +40,14 @@ public class WallsResource {
         return conn;
     }
 
+    /**
+     * Retrieves wallSection data by wallid. It will return an empty list if unable to retrieve wallSections.
+     * @param id - the wallId used to pull up wallSections
+     * @return - a list of wallSections from the Clamber Database
+     */
     @GET
     @Path("wall_sections")
-    public List<WallSection> getWallById(@PathParam("id") int id) {
+    public List<WallSection> getWallById(@PathParam("wall_id") int id) {
         ArrayList<WallSection> wallSections = new ArrayList<>();
         try (Connection conn = getConnection()) {
             Statement stmt = conn.createStatement();
@@ -65,6 +76,15 @@ public class WallsResource {
             "   ON completed_climbs.climb_id = climbs.climb_id AND completed_climbs.user_name = ?\n" +
             "WHERE climbs.wall_id = ?";
 
+    /**
+     * Retrieves Climb data for all climbs on a specific wall section. It also uses the UserName to check
+     * if any of the climbs are marked as projects or completed by the user so that the information can
+     * be populated on the application side. It will return an empty List of Climbs if unable to find any
+     * for the wall Section.
+     * @param wall_id - wall section id number used to populate climbs
+     * @param username - username used in query to determine project/completed status
+     * @return - List of climbs from the Clamber Database
+     */
     @GET
     @Path("wall_sections/{wall_id}/climbs")
     public List<Climb> getWallSectionById(@PathParam("wall_id") int wall_id, @PathParam("username") String username){

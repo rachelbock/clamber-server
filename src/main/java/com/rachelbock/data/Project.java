@@ -1,7 +1,7 @@
 package com.rachelbock.data;
 
 /**
- * Created by rage on 4/4/16.
+ * Class to store Project Data.
  */
 public class Project {
 

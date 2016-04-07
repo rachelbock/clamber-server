@@ -20,6 +20,11 @@ import java.util.Properties;
 @Consumes(MediaType.APPLICATION_JSON)
 public class ProjectResource {
 
+    /**
+     * Gets a Connection to the Clamber Database
+     * @return - connection
+     * @throws SQLException
+     */
     public Connection getConnection() throws SQLException {
         Properties connectionProps = new Properties();
         connectionProps.put("user", "root");
@@ -35,8 +40,17 @@ public class ProjectResource {
         return conn;
     }
 
+    /**
+     * Retrieves climb data for all climbs that the given user has marked as being a project. Returns an empty list if
+     * that user has no projects, or if the user does not exist. It also will include whether or not the project also
+     * exists as a completed climb for the user.
+     *
+     * @param userName - used in the query to pull projects by user
+     * @return - ArrayList of Climbs from the Clamber Database
+     */
+
     @GET
-    public ArrayList<Climb> getProjectsForUser (@PathParam("user_name") String userName) {
+    public ArrayList<Climb> getProjectsForUser(@PathParam("user_name") String userName) {
 
         ArrayList<Climb> climbs = new ArrayList<>();
         try (Connection conn = getConnection();
@@ -53,8 +67,7 @@ public class ProjectResource {
                 climb.setProject(true);
                 if (resultSet.getObject("completed_id") != null) {
                     climb.setCompleted(true);
-                }
-                else {
+                } else {
                     climb.setCompleted(false);
                 }
                 climb.setType(resultSet.getString("climb_type"));
@@ -69,13 +82,19 @@ public class ProjectResource {
         return climbs;
     }
 
+    /**
+     * Method to post a project to the Clamber Database. If it is unable to create a project with the provided information
+     * it throws an exception
+     * @param request - json for project
+     * @return - returns a Project which is not used.
+     */
     @POST
     public Project addProjectToDatabase(NewProjectRequest request) {
         try (Connection conn = getConnection();
-             Statement stmt = conn.createStatement()){
+             Statement stmt = conn.createStatement()) {
 
             stmt.execute("INSERT INTO projects (climb_id, user_name) VALUES " +
-            "(" + request.getClimbId() + ", '" + request.getUsername() + "')");
+                    "(" + request.getClimbId() + ", '" + request.getUsername() + "')");
 
             Project project = new Project();
             project.setUserName(request.getUsername());
@@ -91,37 +110,37 @@ public class ProjectResource {
     }
 
 
-/**
- * Defines how we expect the json in the body to look
-  */
-public static class NewProjectRequest {
-    protected String username;
-    protected int climbId;
-    protected int projectId;
+    /**
+     * Defines how we expect the json in the body to look
+     */
+    public static class NewProjectRequest {
+        protected String username;
+        protected int climbId;
+        protected int projectId;
 
-    public String getUsername() {
-        return username;
-    }
+        public String getUsername() {
+            return username;
+        }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+        public void setUsername(String username) {
+            this.username = username;
+        }
 
-    public int getClimbId() {
-        return climbId;
-    }
+        public int getClimbId() {
+            return climbId;
+        }
 
-    public void setClimbId(int climbId) {
-        this.climbId = climbId;
-    }
+        public void setClimbId(int climbId) {
+            this.climbId = climbId;
+        }
 
-    public int getProjectId() {
-        return projectId;
-    }
+        public int getProjectId() {
+            return projectId;
+        }
 
-    public void setProjectId(int projectId) {
-        this.projectId = projectId;
+        public void setProjectId(int projectId) {
+            this.projectId = projectId;
+        }
     }
-}
 
 }
