@@ -8,13 +8,18 @@ import java.sql.*;
 import java.util.Properties;
 
 /**
- * Created by rage on 3/18/16.
+ * Class to set up the database connection for users.
  */
 @Path("/user")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class UserResource {
 
+    /**
+     * Gets a connection to the Clamber Database
+     * @return - connection
+     * @throws SQLException
+     */
     public Connection getConnection() throws SQLException {
         Properties connectionProps = new Properties();
         connectionProps.put("user", "root");
@@ -30,6 +35,12 @@ public class UserResource {
         return conn;
     }
 
+    /**
+     * Retrieves User information for a given username. If no User exists with the username a NotFound
+     * Exception is thrown.
+     * @param userName - used in query to match user by username
+     * @return - if there is a matching User, the User is returned.
+     */
     @GET
     @Path("/{user_name}")
     public User getUserByUserName(@PathParam("user_name") String userName) {
@@ -56,6 +67,12 @@ public class UserResource {
     }
 
 
+    /**
+     * Method to add a new User to the Clamber Database. If it is unable to add the User, it throws an
+     * exception.
+     * @param request - json for the User
+     * @return - if successful it will return the User.
+     */
     @POST
     public User addUserToDatabase(NewUserRequest request) {
         try (Connection conn = getConnection();
