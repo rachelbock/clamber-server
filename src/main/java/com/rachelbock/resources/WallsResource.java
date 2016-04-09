@@ -1,7 +1,6 @@
 package com.rachelbock.resources;
 
 import com.rachelbock.data.Climb;
-import com.rachelbock.data.Wall;
 import com.rachelbock.data.WallSection;
 
 import javax.ws.rs.*;
@@ -99,17 +98,17 @@ public class WallsResource {
 
             while (resultSet.next()) {
                 Climb climb = new Climb();
-                climb.setId(resultSet.getInt("climb_id"));
+                climb.setClimbId(resultSet.getInt("climbs.climb_id"));
                 climb.setGymRating(resultSet.getInt("gym_rating"));
                 climb.setTapeColor(resultSet.getString("tape_color"));
                 climb.setType(resultSet.getString("climb_type"));
-                if (resultSet.getObject("project_id") != null){
+                if (resultSet.getString("projects.user_name") != null){
                     climb.setProject(true);
                 }
                 else {
                     climb.setProject(false);
                 }
-                if (resultSet.getObject("completed_id") != null) {
+                if (resultSet.getString("completed_climbs.user_name") != null) {
                     climb.setCompleted(true);
                 }
                 else {

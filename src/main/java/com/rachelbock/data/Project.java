@@ -5,7 +5,6 @@ package com.rachelbock.data;
  */
 public class Project {
 
-    protected int projectId;
     protected int climbId;
     protected String userName;
 
@@ -15,14 +14,6 @@ public class Project {
 
     public void setUserName(String userName) {
         this.userName = userName;
-    }
-
-    public int getProjectId() {
-        return projectId;
-    }
-
-    public void setProjectId(int projectId) {
-        this.projectId = projectId;
     }
 
     public int getClimbId() {

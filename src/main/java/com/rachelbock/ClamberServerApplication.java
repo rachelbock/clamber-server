@@ -1,5 +1,6 @@
 package com.rachelbock;
 
+import com.rachelbock.resources.CompletedResource;
 import com.rachelbock.resources.ProjectResource;
 import com.rachelbock.resources.UserResource;
 import com.rachelbock.resources.WallsResource;
@@ -30,6 +31,7 @@ public class ClamberServerApplication extends Application<ClamberServerConfigura
         environment.jersey().register(new WallsResource());
         environment.jersey().register(new UserResource());
         environment.jersey().register(new ProjectResource());
+        environment.jersey().register(new CompletedResource());
     }
 
 }

@@ -2,9 +2,7 @@ package com.rachelbock.resources;
 
 import com.rachelbock.data.Climb;
 import com.rachelbock.data.Project;
-import com.rachelbock.data.User;
 
-import javax.swing.plaf.nimbus.State;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.sql.*;
@@ -15,7 +13,7 @@ import java.util.Properties;
  * Class to set up the database connection for projects
  */
 
-@Path("/projects/{user_name}")
+@Path("/projects")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class ProjectResource {
@@ -40,6 +38,13 @@ public class ProjectResource {
         return conn;
     }
 
+
+    public static final String GET_PROJECT_BY_USER_QUERY = "SELECT * FROM projects \n" +
+            "INNER JOIN climbs ON projects.climb_id = climbs.climb_id \n" +
+            "LEFT OUTER JOIN completed_climbs ON completed_climbs.climb_id = climbs.climb_id \n" +
+            "AND completed_climbs.user_name = projects.user_name \n" +
+            "WHERE projects.user_name = ?";
+
     /**
      * Retrieves climb data for all climbs that the given user has marked as being a project. Returns an empty list if
      * that user has no projects, or if the user does not exist. It also will include whether or not the project also
@@ -48,24 +53,26 @@ public class ProjectResource {
      * @param userName - used in the query to pull projects by user
      * @return - ArrayList of Climbs from the Clamber Database
      */
-
+    @Path("{user_name}")
     @GET
     public ArrayList<Climb> getProjectsForUser(@PathParam("user_name") String userName) {
 
         ArrayList<Climb> climbs = new ArrayList<>();
-        try (Connection conn = getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet resultSet = stmt.executeQuery("SELECT * FROM projects INNER JOIN climbs ON projects.climb_id = climbs.climb_id LEFT OUTER JOIN completed_climbs ON completed_climbs.climb_id = climbs.climb_id AND completed_climbs.user_name = projects.user_name WHERE projects.user_name = '" + userName + "'")) {
+        try (Connection conn = getConnection()){
+            PreparedStatement stmt = conn.prepareStatement(GET_PROJECT_BY_USER_QUERY);
+            stmt.setString(1, userName);
+
+            ResultSet resultSet = stmt.executeQuery();
 
             while (resultSet.next()) {
                 Climb climb = new Climb();
-                climb.setId(resultSet.getInt("climb_id"));
+                climb.setClimbId(resultSet.getInt("projects.climb_id"));
                 climb.setGymRating(resultSet.getInt("gym_rating"));
                 climb.setUserRating(resultSet.getInt("user_rating"));
                 climb.setTapeColor(resultSet.getString("tape_color"));
                 climb.setWallId(resultSet.getInt("wall_id"));
                 climb.setProject(true);
-                if (resultSet.getObject("completed_id") != null) {
+                if (resultSet.getString("completed_climbs.user_name") != null) {
                     climb.setCompleted(true);
                 } else {
                     climb.setCompleted(false);
@@ -93,8 +100,7 @@ public class ProjectResource {
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement()) {
 
-            stmt.execute("INSERT INTO projects (climb_id, user_name) VALUES " +
-                    "(" + request.getClimbId() + ", '" + request.getUsername() + "')");
+            stmt.execute("INSERT INTO projects (user_name, climb_id) VALUES ('" + request.getUsername() + "', " + request.getClimbId() +")");
 
             Project project = new Project();
             project.setUserName(request.getUsername());
@@ -109,6 +115,38 @@ public class ProjectResource {
         throw new InternalServerErrorException("Could not create new project for user " + request.getUsername());
     }
 
+    public static final String REMOVE_QUERY = ("DELETE FROM projects WHERE user_name = ? AND climb_id = ?");
+
+    /**
+     * Method to delete a project from the database. It returns a boolean indicating whether or not the project
+     * was successfully created.
+     * @param username - username used in query
+     * @param climb_id - climb_id used in query
+     * @return - boolean indicating success.
+     */
+    @Path("{username}/climbs/{climb_id}")
+    @DELETE
+    public boolean removeProjectFromDatabase(@PathParam("username") String username, @PathParam("climb_id") int climb_id){
+        boolean wasRemoved = false;
+
+        try (Connection conn = getConnection()) {
+            PreparedStatement stmt = conn.prepareStatement(REMOVE_QUERY);
+            stmt.setString(1, username);
+            stmt.setInt(2, climb_id);
+
+            stmt.execute();
+
+            wasRemoved = true;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            wasRemoved = false;
+        }
+
+        return wasRemoved;
+    }
+
+
 
     /**
      * Defines how we expect the json in the body to look
@@ -116,7 +154,7 @@ public class ProjectResource {
     public static class NewProjectRequest {
         protected String username;
         protected int climbId;
-        protected int projectId;
+
 
         public String getUsername() {
             return username;
@@ -134,13 +172,6 @@ public class ProjectResource {
             this.climbId = climbId;
         }
 
-        public int getProjectId() {
-            return projectId;
-        }
-
-        public void setProjectId(int projectId) {
-            this.projectId = projectId;
-        }
     }
 
 }
