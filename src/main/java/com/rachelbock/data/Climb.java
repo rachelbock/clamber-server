@@ -14,11 +14,11 @@ public class Climb {
     protected boolean isCompleted;
     protected String type;
 
-    public int getId() {
+    public int getClimbId() {
         return climbId;
     }
 
-    public void setId(int id) {
+    public void setClimbId(int id) {
         this.climbId = id;
     }
 
