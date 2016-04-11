@@ -1,5 +1,7 @@
 package com.rachelbock.resources;
 
+import com.rachelbock.db.ConnectionPool;
+
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.sql.*;
@@ -15,26 +17,6 @@ import java.util.Properties;
 public class CompletedResource {
 
     /**
-    * Gets a Connection to the Clamber Database
-    * @return - connection
-    * @throws SQLException
-    */
-    public Connection getConnection() throws SQLException {
-        Properties connectionProps = new Properties();
-        connectionProps.put("user", "root");
-        connectionProps.put("password", "root");
-
-        String dbms = "mysql";
-        String serverName = "localhost";
-        int portNumber = 3306;
-        String dbName = "clamber";
-
-        String connectionString = "jdbc:" + dbms + "://" + serverName + ":" + portNumber + "/" + dbName;
-        Connection conn = DriverManager.getConnection(connectionString, connectionProps);
-        return conn;
-    }
-
-    /**
      * Method to post a completed climb to the Clamber Database. It will return a Boolean indicating whether
      * the climb was successfully created.
      * @param request - json for project
@@ -43,7 +25,7 @@ public class CompletedResource {
     @POST
     public boolean addCompletedClimbToDatabase(NewCompletedClimbRequest request){
         boolean wasRemoved = false;
-        try(Connection conn = getConnection();
+        try(Connection conn = ConnectionPool.getConnection();
             Statement stmt = conn.createStatement()){
 
             stmt.execute("INSERT INTO completed_climbs (user_name, climb_id) VALUES ( '" + request.getUsername() + "', " + request.getClimbId() +")");
@@ -71,7 +53,7 @@ public class CompletedResource {
     public boolean removeCompletedClimb(@PathParam("username") String username, @PathParam("climb_id") int climb_id){
         boolean wasRemoved = false;
 
-        try(Connection conn = getConnection()){
+        try(Connection conn = ConnectionPool.getConnection()){
             PreparedStatement stmt = conn.prepareStatement(REMOVE_QUERY);
             stmt.setString(1, username);
             stmt.setInt(2, climb_id);

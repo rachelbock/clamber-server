@@ -2,6 +2,7 @@ package com.rachelbock.resources;
 
 import com.rachelbock.data.Climb;
 import com.rachelbock.data.Project;
+import com.rachelbock.db.ConnectionPool;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -17,26 +18,6 @@ import java.util.Properties;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class ProjectResource {
-
-    /**
-     * Gets a Connection to the Clamber Database
-     * @return - connection
-     * @throws SQLException
-     */
-    public Connection getConnection() throws SQLException {
-        Properties connectionProps = new Properties();
-        connectionProps.put("user", "root");
-        connectionProps.put("password", "root");
-
-        String dbms = "mysql";
-        String serverName = "localhost";
-        int portNumber = 3306;
-        String dbName = "clamber";
-
-        String connectionString = "jdbc:" + dbms + "://" + serverName + ":" + portNumber + "/" + dbName;
-        Connection conn = DriverManager.getConnection(connectionString, connectionProps);
-        return conn;
-    }
 
 
     public static final String GET_PROJECT_BY_USER_QUERY = "SELECT * FROM projects \n" +
@@ -58,7 +39,7 @@ public class ProjectResource {
     public ArrayList<Climb> getProjectsForUser(@PathParam("user_name") String userName) {
 
         ArrayList<Climb> climbs = new ArrayList<>();
-        try (Connection conn = getConnection()){
+        try (Connection conn = ConnectionPool.getConnection()){
             PreparedStatement stmt = conn.prepareStatement(GET_PROJECT_BY_USER_QUERY);
             stmt.setString(1, userName);
 
@@ -97,7 +78,7 @@ public class ProjectResource {
      */
     @POST
     public Project addProjectToDatabase(NewProjectRequest request) {
-        try (Connection conn = getConnection();
+        try (Connection conn = ConnectionPool.getConnection();
              Statement stmt = conn.createStatement()) {
 
             stmt.execute("INSERT INTO projects (user_name, climb_id) VALUES ('" + request.getUsername() + "', " + request.getClimbId() +")");
@@ -129,7 +110,7 @@ public class ProjectResource {
     public boolean removeProjectFromDatabase(@PathParam("username") String username, @PathParam("climb_id") int climb_id){
         boolean wasRemoved = false;
 
-        try (Connection conn = getConnection()) {
+        try (Connection conn = ConnectionPool.getConnection()) {
             PreparedStatement stmt = conn.prepareStatement(REMOVE_QUERY);
             stmt.setString(1, username);
             stmt.setInt(2, climb_id);

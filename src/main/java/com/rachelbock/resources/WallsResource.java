@@ -2,6 +2,7 @@ package com.rachelbock.resources;
 
 import com.rachelbock.data.Climb;
 import com.rachelbock.data.WallSection;
+import com.rachelbock.db.ConnectionPool;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -19,25 +20,6 @@ import java.util.Properties;
 @Consumes(MediaType.APPLICATION_JSON)
 public class WallsResource {
 
-    /**
-     * Gets a Connection to the Clamber Database
-     * @return - connection
-     * @throws SQLException
-     */
-    public Connection getConnection() throws SQLException {
-        Properties connectionProps = new Properties();
-        connectionProps.put("user", "root");
-        connectionProps.put("password", "root");
-
-        String dbms = "mysql";
-        String serverName = "localhost";
-        int portNumber = 3306;
-        String dbName = "clamber";
-
-        String connectionString = "jdbc:" + dbms + "://" + serverName + ":" + portNumber + "/" + dbName;
-        Connection conn = DriverManager.getConnection(connectionString, connectionProps);
-        return conn;
-    }
 
     /**
      * Retrieves wallSection data by wallid. It will return an empty list if unable to retrieve wallSections.
@@ -48,7 +30,7 @@ public class WallsResource {
     @Path("wall_sections")
     public List<WallSection> getWallById(@PathParam("wall_id") int id) {
         ArrayList<WallSection> wallSections = new ArrayList<>();
-        try (Connection conn = getConnection()) {
+        try (Connection conn = ConnectionPool.getConnection()) {
             Statement stmt = conn.createStatement();
             ResultSet resultSet = stmt.executeQuery("SELECT * FROM wall_sections WHERE wall_segment = " + id);
 
@@ -88,7 +70,7 @@ public class WallsResource {
     @Path("wall_sections/{wall_id}/climbs")
     public List<Climb> getWallSectionById(@PathParam("wall_id") int wall_id, @PathParam("username") String username){
         List<Climb> climbs = new ArrayList<>();
-        try (Connection conn = getConnection()) {
+        try (Connection conn = ConnectionPool.getConnection()) {
             PreparedStatement stmt = conn.prepareStatement(WALL_SECTIONS_BY_ID_QUERY);
             stmt.setString(1, username);
             stmt.setString(2, username);
