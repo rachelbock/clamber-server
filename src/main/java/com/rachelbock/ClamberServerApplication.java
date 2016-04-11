@@ -5,6 +5,7 @@ import com.rachelbock.resources.ProjectResource;
 import com.rachelbock.resources.UserResource;
 import com.rachelbock.resources.WallsResource;
 import io.dropwizard.Application;
+import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
@@ -21,7 +22,7 @@ public class ClamberServerApplication extends Application<ClamberServerConfigura
 
     @Override
     public void initialize(final Bootstrap<ClamberServerConfiguration> bootstrap) {
-        // TODO: application initialization
+        bootstrap.addBundle(new AssetsBundle("/assets", "/assets", "index.html"));
 
     }
 
