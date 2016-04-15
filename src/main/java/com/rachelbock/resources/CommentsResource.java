@@ -6,7 +6,6 @@ import com.rachelbock.db.ConnectionPool;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.sql.*;
-import java.time.Instant;
 import java.util.ArrayList;
 
 import java.util.List;
@@ -21,7 +20,7 @@ public class CommentsResource {
 
     public static final String GET_COMMENTS_QUERY = "SELECT * FROM comments INNER JOIN climbs \n" +
             "ON comments.climb_id = climbs.climb_id \n" +
-            "WHERE climbs.climb_id = ? ORDER BY date_text DESC";
+            "WHERE climbs.climb_id = ? ORDER BY date_long DESC";
 
 
     /**
@@ -44,7 +43,7 @@ public class CommentsResource {
                 Comment comment = new Comment();
                 comment.setClimbId(climb_id);
                 comment.setComment(resultSet.getString("comment_text"));
-                comment.setDate(resultSet.getLong("date_text"));
+                comment.setDate(resultSet.getLong("date_long"));
                 comment.setUserName(resultSet.getString("user_name"));
 
                 comments.add(comment);
@@ -53,13 +52,13 @@ public class CommentsResource {
 
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new InternalServerErrorException(e);
         }
-
 
         return comments;
     }
 
-    public static final String ADD_CLIMB_QUERY = "INSERT INTO comments (comment_text, user_name, date_text, climb_id) \n" +
+    public static final String ADD_CLIMB_QUERY = "INSERT INTO comments (comment_text, user_name, date_long, climb_id) \n" +
             "VALUES (?, ?, ?, ?)";
 
     /**
@@ -76,7 +75,7 @@ public class CommentsResource {
             PreparedStatement stmt = conn.prepareStatement(ADD_CLIMB_QUERY);
             stmt.setString(1, request.getCommmentText());
             stmt.setString(2, request.getUsername());
-            stmt.setLong(3, request.getDateText());
+            stmt.setLong(3, request.getDate());
             stmt.setInt(4, request.getClimbId());
             stmt.execute();
             addedComment = true;
@@ -96,7 +95,7 @@ public class CommentsResource {
         protected String username;
         protected int climbId;
         protected String commmentText;
-        protected long dateText;
+        protected long date;
 
         public String getUsername() {
             return username;
@@ -122,12 +121,12 @@ public class CommentsResource {
             this.commmentText = commmentText;
         }
 
-        public long getDateText() {
-            return dateText;
+        public long getDate() {
+            return date;
         }
 
-        public void setDateText(long dateText) {
-            this.dateText = dateText;
+        public void setDate(long date) {
+            this.date = date;
         }
     }
 }

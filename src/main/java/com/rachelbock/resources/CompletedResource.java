@@ -111,6 +111,7 @@ public class CompletedResource {
 
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new InternalServerErrorException(e);
         }
 
         return climbs;
