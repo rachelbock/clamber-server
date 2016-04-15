@@ -24,7 +24,7 @@ public class ProjectResource {
             "INNER JOIN climbs ON projects.climb_id = climbs.climb_id \n" +
             "LEFT OUTER JOIN completed_climbs ON completed_climbs.climb_id = climbs.climb_id \n" +
             "AND completed_climbs.user_name = projects.user_name \n" +
-            "WHERE projects.user_name = ?";
+            "WHERE projects.user_name = ? ORDER BY projects.date_long DESC";
 
     /**
      * Retrieves climb data for all climbs that the given user has marked as being a project. Returns an empty list if
@@ -135,6 +135,7 @@ public class ProjectResource {
     public static class NewProjectRequest {
         protected String username;
         protected int climbId;
+        protected long date;
 
 
         public String getUsername() {
@@ -153,6 +154,13 @@ public class ProjectResource {
             this.climbId = climbId;
         }
 
+        public long getDate() {
+            return date;
+        }
+
+        public void setDate(long date) {
+            this.date = date;
+        }
     }
 
 }

@@ -78,6 +78,33 @@ public class UserResource {
         throw new InternalServerErrorException("Could not create new user " + request.getUsername());
     }
 
+    public static final String UPDATE_USER_QUERY = "UPDATE user_information SET height = ?, skill_level = ? \n" +
+            "WHERE user_name = ?";
+
+    /**
+     * Method to update an existing user in the database.
+     * @param request - json for the User
+     * @return - updated User
+     */
+    @Path("/{username}/update")
+    @POST
+    public User updateExistingUser(@PathParam("username") String username, NewUserRequest request) {
+        try(Connection conn = ConnectionPool.getConnection()){
+            PreparedStatement stmt = conn.prepareStatement(UPDATE_USER_QUERY);
+            stmt.setInt(1, request.getHeight());
+            stmt.setInt(2, request.getSkill());
+            stmt.setString(3, username);
+
+            stmt.execute();
+
+            return getUserByUserName(request.getUsername());
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        throw new InternalServerErrorException("Could not create new user");
+    }
+
 
     public static final String RECOMMENDATIONS_QUERY = "SELECT * FROM climbs\n" +
             "INNER JOIN user_information\n" +

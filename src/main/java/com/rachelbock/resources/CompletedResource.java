@@ -1,10 +1,13 @@
 package com.rachelbock.resources;
 
+import com.rachelbock.data.Climb;
 import com.rachelbock.db.ConnectionPool;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -16,6 +19,9 @@ import java.util.Properties;
 @Consumes(MediaType.APPLICATION_JSON)
 public class CompletedResource {
 
+    public static final String ADD_COMPLETED_CLIMB_QUERY = "INSERT INTO completed_climbs (user_name, climb_id, date_long) \n" +
+            "VALUES (?, ?, ?)";
+
     /**
      * Method to post a completed climb to the Clamber Database. It will return a Boolean indicating whether
      * the climb was successfully created.
@@ -26,9 +32,11 @@ public class CompletedResource {
     public boolean addCompletedClimbToDatabase(NewCompletedClimbRequest request){
         boolean wasRemoved = false;
         try(Connection conn = ConnectionPool.getConnection();
-            Statement stmt = conn.createStatement()){
-
-            stmt.execute("INSERT INTO completed_climbs (user_name, climb_id) VALUES ( '" + request.getUsername() + "', " + request.getClimbId() +")");
+            PreparedStatement stmt = conn.prepareStatement(ADD_COMPLETED_CLIMB_QUERY)){
+            stmt.setString(1, request.getUsername());
+            stmt.setInt(2, request.getClimbId());
+            stmt.setLong(3, request.getDate());
+            stmt.execute();
             wasRemoved = true;
 
 
@@ -69,6 +77,46 @@ public class CompletedResource {
         return wasRemoved;
     }
 
+    public static final String HISTORY_QUERY = ("SELECT * FROM climbs\n" +
+            "INNER JOIN completed_climbs ON completed_climbs.climb_id = climbs.climb_id\n" +
+            "LEFT OUTER JOIN projects ON projects.climb_id = climbs.climb_id\n" +
+            "WHERE completed_climbs.user_name = ? ORDER BY completed_climbs.date_long DESC");
+    @Path("{username}")
+    @GET
+    public List<Climb> getCompletedHistory(@PathParam("username") String username){
+        List<Climb> climbs = new ArrayList<>();
+
+        try(Connection conn = ConnectionPool.getConnection()){
+            PreparedStatement stmt = conn.prepareStatement(HISTORY_QUERY);
+            stmt.setString(1, username);
+
+            ResultSet resultSet = stmt.executeQuery();
+
+            while (resultSet.next()){
+                Climb climb = new Climb();
+                climb.setClimbId(resultSet.getInt("climb_id"));
+                climb.setGymRating(resultSet.getInt("gym_rating"));
+                climb.setUserRating(resultSet.getInt("user_rating"));
+                climb.setWallId(resultSet.getInt("wall_id"));
+                climb.setTapeColor(resultSet.getString("tape_color"));
+                climb.setCompleted(true);
+                if (resultSet.getString("projects.user_name") != null){
+                    climb.setProject(true);
+                }
+                else {
+                    climb.setProject(false);
+                }
+                climbs.add(climb);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new InternalServerErrorException(e);
+        }
+
+        return climbs;
+    }
+
 
     /**
      * Defines how we expect the json in the body to look
@@ -76,6 +124,7 @@ public class CompletedResource {
     public static class NewCompletedClimbRequest {
         protected String username;
         protected int climbId;
+        protected long date;
 
 
         public String getUsername() {
@@ -94,6 +143,13 @@ public class CompletedResource {
             this.climbId = climbId;
         }
 
+        public long getDate() {
+            return date;
+        }
+
+        public void setDate(long date) {
+            this.date = date;
+        }
     }
 
 }
