@@ -7,6 +7,7 @@ public class Project {
 
     protected int climbId;
     protected String userName;
+    protected long date;
 
     public String getUserName() {
         return userName;
@@ -24,4 +25,11 @@ public class Project {
         this.climbId = climbId;
     }
 
+    public long getDate() {
+        return date;
+    }
+
+    public void setDate(long date) {
+        this.date = date;
+    }
 }

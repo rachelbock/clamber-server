@@ -16,9 +16,9 @@ public class ConnectionPool {
 
     static {
         HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:mysql://localhost:3306/clamber");
+        config.setJdbcUrl("jdbc:mysql://104.154.120.100:3306/clamber");
         config.setUsername("root");
-        config.setPassword("root");
+        config.setPassword(System.getenv("DB_PASSWORD"));
         config.addDataSourceProperty("cachePrepStmts", "true");
         config.addDataSourceProperty("prepStmtCacheSize", "250");
         config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
