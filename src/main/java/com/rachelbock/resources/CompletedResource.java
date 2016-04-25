@@ -79,8 +79,10 @@ public class CompletedResource {
 
     public static final String HISTORY_QUERY = ("SELECT * FROM climbs\n" +
             "INNER JOIN completed_climbs ON completed_climbs.climb_id = climbs.climb_id\n" +
+            "AND completed_climbs.user_name = ?\n" +
             "LEFT OUTER JOIN projects ON projects.climb_id = climbs.climb_id\n" +
-            "WHERE completed_climbs.user_name = ? ORDER BY completed_climbs.date_long DESC");
+            "AND projects.user_name = ?\n" +
+            "ORDER BY completed_climbs.date_long DESC");
     @Path("{username}")
     @GET
     public List<Climb> getCompletedHistory(@PathParam("username") String username){
@@ -89,6 +91,7 @@ public class CompletedResource {
         try(Connection conn = ConnectionPool.getConnection()){
             PreparedStatement stmt = conn.prepareStatement(HISTORY_QUERY);
             stmt.setString(1, username);
+            stmt.setString(2, username);
 
             ResultSet resultSet = stmt.executeQuery();
 
@@ -99,6 +102,7 @@ public class CompletedResource {
                 climb.setUserRating(resultSet.getInt("user_rating"));
                 climb.setWallId(resultSet.getInt("wall_id"));
                 climb.setTapeColor(resultSet.getString("tape_color"));
+                climb.setType(resultSet.getString("climb_type"));
                 climb.setCompleted(true);
                 if (resultSet.getString("projects.user_name") != null){
                     climb.setProject(true);

@@ -24,7 +24,8 @@ public class ProjectResource {
             "INNER JOIN climbs ON projects.climb_id = climbs.climb_id \n" +
             "LEFT OUTER JOIN completed_climbs ON completed_climbs.climb_id = climbs.climb_id \n" +
             "AND completed_climbs.user_name = projects.user_name \n" +
-            "WHERE projects.user_name = ? ORDER BY projects.date_long DESC";
+            "WHERE projects.user_name = ? AND completed_climbs.user_name IS NULL \n" +
+            "ORDER BY projects.date_long DESC";
 
     /**
      * Retrieves climb data for all climbs that the given user has marked as being a project. Returns an empty list if
@@ -39,12 +40,12 @@ public class ProjectResource {
     public ArrayList<Climb> getProjectsForUser(@PathParam("user_name") String userName) {
 
         ArrayList<Climb> climbs = new ArrayList<>();
-        try (Connection conn = ConnectionPool.getConnection()){
+        try (Connection conn = ConnectionPool.getConnection()) {
             PreparedStatement stmt = conn.prepareStatement(GET_PROJECT_BY_USER_QUERY);
             stmt.setString(1, userName);
 
             ResultSet resultSet = stmt.executeQuery();
-
+//
             while (resultSet.next()) {
                 Climb climb = new Climb();
                 climb.setClimbId(resultSet.getInt("projects.climb_id"));
@@ -70,22 +71,29 @@ public class ProjectResource {
         return climbs;
     }
 
+    public static final String ADD_PROJECT_QUERY = "INSERT INTO projects (user_name, climb_id, date_long) \n" +
+            "VALUES (?, ?, ?)";
+
     /**
      * Method to post a project to the Clamber Database. If it is unable to create a project with the provided information
      * it throws an exception
+     *
      * @param request - json for project
      * @return - returns a Project which is not used.
      */
     @POST
     public Project addProjectToDatabase(NewProjectRequest request) {
         try (Connection conn = ConnectionPool.getConnection();
-             Statement stmt = conn.createStatement()) {
-
-            stmt.execute("INSERT INTO projects (user_name, climb_id) VALUES ('" + request.getUsername() + "', " + request.getClimbId() +")");
+             PreparedStatement stmt = conn.prepareStatement(ADD_PROJECT_QUERY)) {
+            stmt.setString(1, request.getUsername());
+            stmt.setInt(2, request.getClimbId());
+            stmt.setLong(3, request.getDate());
+            stmt.execute();
 
             Project project = new Project();
             project.setUserName(request.getUsername());
             project.setClimbId(request.getClimbId());
+            project.setDate(request.getDate());
 
             return project;
 
@@ -101,13 +109,14 @@ public class ProjectResource {
     /**
      * Method to delete a project from the database. It returns a boolean indicating whether or not the project
      * was successfully created.
+     *
      * @param username - username used in query
      * @param climb_id - climb_id used in query
      * @return - boolean indicating success.
      */
     @Path("{username}/climbs/{climb_id}")
     @DELETE
-    public boolean removeProjectFromDatabase(@PathParam("username") String username, @PathParam("climb_id") int climb_id){
+    public boolean removeProjectFromDatabase(@PathParam("username") String username, @PathParam("climb_id") int climb_id) {
         boolean wasRemoved = false;
 
         try (Connection conn = ConnectionPool.getConnection()) {
@@ -126,7 +135,6 @@ public class ProjectResource {
 
         return wasRemoved;
     }
-
 
 
     /**

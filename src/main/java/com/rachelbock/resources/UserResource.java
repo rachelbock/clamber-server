@@ -108,14 +108,14 @@ public class UserResource {
 
     public static final String RECOMMENDATIONS_QUERY = "SELECT * FROM climbs\n" +
             "INNER JOIN user_information\n" +
-            "ON climbs.gym_rating = user_information.skill_level\n" +
-            "OR climbs.gym_rating = user_information.skill_level +1\n" +
-            "OR climbs.gym_rating = user_information.skill_level -1\n" +
+            "ON climbs.gym_rating <= user_information.skill_level +1\n" +
+            "AND climbs.gym_rating >= user_information.skill_level -1\n" +
             "LEFT OUTER JOIN projects\n" +
             "ON projects.climb_id = climbs.climb_id AND projects.user_name = ?\n" +
             "LEFT OUTER JOIN completed_climbs\n" +
             "ON completed_climbs.climb_id = climbs.climb_id AND completed_climbs.user_name = ?\n" +
-            "WHERE user_information.user_name = ?";
+            "WHERE user_information.user_name = ? AND projects.user_name IS NULL\n" +
+            "AND completed_climbs.user_name IS NULL";
 
     /**
      * Method to get recommendations for a user based on the user's skill level.

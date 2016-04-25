@@ -31,6 +31,7 @@ public class ClamberServerApplication extends Application<ClamberServerConfigura
         environment.jersey().register(new ProjectResource());
         environment.jersey().register(new CompletedResource());
         environment.jersey().register(new CommentsResource());
+        environment.jersey().register(new RatingsResource());
     }
 
 }
