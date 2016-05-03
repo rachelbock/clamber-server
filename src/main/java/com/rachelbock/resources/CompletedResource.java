@@ -99,7 +99,6 @@ public class CompletedResource {
                 Climb climb = new Climb();
                 climb.setClimbId(resultSet.getInt("climb_id"));
                 climb.setGymRating(resultSet.getInt("gym_rating"));
-                climb.setUserRating(resultSet.getInt("user_rating"));
                 climb.setWallId(resultSet.getInt("wall_id"));
                 climb.setTapeColor(resultSet.getString("tape_color"));
                 climb.setType(resultSet.getString("climb_type"));
