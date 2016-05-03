@@ -50,7 +50,6 @@ public class ProjectResource {
                 Climb climb = new Climb();
                 climb.setClimbId(resultSet.getInt("projects.climb_id"));
                 climb.setGymRating(resultSet.getInt("gym_rating"));
-                climb.setUserRating(resultSet.getInt("user_rating"));
                 climb.setTapeColor(resultSet.getString("tape_color"));
                 climb.setWallId(resultSet.getInt("wall_id"));
                 climb.setProject(true);
