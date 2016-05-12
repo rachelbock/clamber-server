@@ -24,7 +24,7 @@ public class ProjectResource {
             "INNER JOIN climbs ON projects.climb_id = climbs.climb_id \n" +
             "LEFT OUTER JOIN completed_climbs ON completed_climbs.climb_id = climbs.climb_id \n" +
             "AND completed_climbs.user_name = projects.user_name \n" +
-            "WHERE projects.user_name = ? AND completed_climbs.user_name IS NULL \n" +
+            "WHERE projects.user_name = ? AND completed_climbs.user_name IS NULL AND climbs.removed = false\n" +
             "ORDER BY projects.date_long DESC";
 
     /**

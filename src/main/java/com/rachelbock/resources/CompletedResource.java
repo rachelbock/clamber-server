@@ -103,6 +103,13 @@ public class CompletedResource {
                 climb.setTapeColor(resultSet.getString("tape_color"));
                 climb.setType(resultSet.getString("climb_type"));
                 climb.setCompleted(true);
+                if (resultSet.getBoolean("removed")) {
+                    climb.setRemoved(true);
+                }
+                else {
+                    climb.setRemoved(false);
+                }
+
                 if (resultSet.getString("projects.user_name") != null){
                     climb.setProject(true);
                 }
