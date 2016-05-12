@@ -13,6 +13,7 @@ public class Climb {
     protected boolean isProject;
     protected boolean isCompleted;
     protected String type;
+    protected boolean removed;
 
     public int getClimbId() {
         return climbId;
@@ -75,5 +76,13 @@ public class Climb {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public boolean isRemoved() {
+        return removed;
+    }
+
+    public void setRemoved(boolean removed) {
+        this.removed = removed;
     }
 }

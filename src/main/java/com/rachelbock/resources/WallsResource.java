@@ -55,7 +55,7 @@ public class WallsResource {
             "   ON projects.climb_id = climbs.climb_id AND projects.user_name = ?\n" +
             "LEFT OUTER JOIN completed_climbs " +
             "   ON completed_climbs.climb_id = climbs.climb_id AND completed_climbs.user_name = ?\n" +
-            "WHERE climbs.wall_id = ?";
+            "WHERE climbs.wall_id = ? AND climbs.removed = false";
 
     /**
      * Retrieves Climb data for all climbs on a specific wall section. It also uses the UserName to check
