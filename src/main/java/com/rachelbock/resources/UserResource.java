@@ -115,7 +115,7 @@ public class UserResource {
             "LEFT OUTER JOIN completed_climbs\n" +
             "ON completed_climbs.climb_id = climbs.climb_id AND completed_climbs.user_name = ?\n" +
             "WHERE user_information.user_name = ? AND projects.user_name IS NULL\n" +
-            "AND completed_climbs.user_name IS NULL";
+            "AND completed_climbs.user_name IS NULL AND climbs.removed = false";
 
     /**
      * Method to get recommendations for a user based on the user's skill level.
