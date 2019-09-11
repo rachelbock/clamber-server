@@ -16,9 +16,10 @@ public class ConnectionPool {
 
     static {
         HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:mysql://104.154.120.100:3306/clamber");
-        config.setUsername("root");
+        config.setJdbcUrl("jdbc:mysql://innovation-fest-db.crejm0uy426e.us-west-2.rds.amazonaws.com:3306/clamber");
+        config.setUsername("admin");
         config.setPassword(System.getenv("DB_PASSWORD"));
+        config.setDriverClassName("com.mysql.jdbc.Driver");
         config.addDataSourceProperty("cachePrepStmts", "true");
         config.addDataSourceProperty("prepStmtCacheSize", "250");
         config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
